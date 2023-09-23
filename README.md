@@ -2,7 +2,9 @@
 
 A classic Tic-Tac-Toe game with a graphical user interface (GUI) implemented in Python using the Tkinter library.
 
-![Tic-Tac-Toe Screenshot](screenshot.png)
+![Tic-Tac-Toe Screenshot](images/main.png)
+
+![Tic-Tac-Toe Screenshot](images/game.png)
 
 ## Table of Contents
 
