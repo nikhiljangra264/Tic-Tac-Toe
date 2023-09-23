@@ -14,7 +14,6 @@ A classic Tic-Tac-Toe game with a graphical user interface (GUI) implemented in 
   - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
-- [Acknowledgments](#acknowledgments)
 - [Contact](#contact)
 
 ## Overview
