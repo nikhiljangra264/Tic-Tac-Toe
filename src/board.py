@@ -23,7 +23,6 @@ class Board:
         
         return MARK.EMPTY
     
-
     def has_empty(self):
         return any(cell == MARK.EMPTY for cell in self.m_board)
     

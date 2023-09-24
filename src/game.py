@@ -9,9 +9,10 @@ from engine import engine
 
 class GUI:
     def __init__(self) -> None:
-        self.app = Tk()
-        self.app.title('Tic-Tac-Toe')
-        self.app.geometry("500x500")
+        self.app = Tk()                         # initialise the main window
+        self.app.title('Tic-Tac-Toe')           # set the title name to display on the main window
+        self.app.geometry("500x500")            # set the initial opening geometry of the main window
+        self.app.minsize(width=400, height=400) # set minimum size of the main window
 
         # Create a frame to center the elements
         self.center_frame = Frame(self.app, bg="#f2f2f2")
@@ -24,16 +25,18 @@ class GUI:
         self.font = Font(family='Helvetica', size=32, weight="bold")
         self.buttons = []
 
-        self.gamemode = StringVar() # variable to store game mode
-        self.gamemode.set("PvP")  # Set a default game mode
+        self.gamemode = StringVar()     # variable to store game mode
+        self.gamemode.set("PvP")        # Set a default game mode
 
-        self.difficulty = StringVar()  # variable to store difficulty level
-        self.difficulty.set("Medium")  # Set a default difficulty level
+        self.difficulty = StringVar()   # variable to store difficulty level
+        self.difficulty.set("Medium")   # Set a default difficulty level
 
-        mode_label = Label(self.center_frame, 
+        mode_label = Label(self.center_frame,
                            text='Select game mode: ',
                            bg='#f2f2f2', font=('Helvetica',14))
-        mode_label.grid(row=0, column=0, columnspan=SIZE,sticky='WE', padx=10)
+        mode_label.grid(row=0, column=0, 
+                        pady=20,columnspan=SIZE,
+                        sticky='WE', padx=10)
 
         # radio button for selecting mode
         player_vs_player = Radiobutton(self.center_frame,
@@ -41,14 +44,14 @@ class GUI:
                                        variable=self.gamemode, 
                                        value="PvP", 
                                        font=('Helvetica', 12))
-        player_vs_player.grid(row=1, column=0, columnspan=SIZE, sticky="WE")
+        player_vs_player.grid(row=1, column=0, columnspan=SIZE, sticky="WE", pady=10)
 
         player_vs_computer = Radiobutton(self.center_frame, 
                                          text="Player vs Computer", 
                                          variable=self.gamemode, 
                                          value="PvC", 
                                          font=('Helvetica', 12))
-        player_vs_computer.grid(row=2, column=0, columnspan=SIZE, sticky="WE")
+        player_vs_computer.grid(row=2, column=0, columnspan=SIZE, sticky="WE", pady=10)
 
         # OptionMenu for selecting difficulty level
         difficulty_label = Label(self.center_frame, 
@@ -59,9 +62,9 @@ class GUI:
         difficulty_options = ["Easy", "Medium", "Hard"]
         difficulty_menu = OptionMenu(self.center_frame, 
                                      self.difficulty, 
-                                     *difficulty_options,)
+                                     *difficulty_options)
         difficulty_menu.config(font=('Helvetica', 12))
-        difficulty_menu.grid(row=4, column=0, columnspan=SIZE, sticky="WE")
+        difficulty_menu.grid(row=4, column=0, columnspan=SIZE, sticky="WE", pady=40)
 
         start_button = Button(self.center_frame, 
                               text='Start Game', 
@@ -77,11 +80,12 @@ class GUI:
                                 text='', 
                                 font=('Helvetica', 16, 'bold'), 
                                 bg='#f2f2f2')
-        self.info_label.grid(row=6, column=0, columnspan=SIZE, sticky="WE")
+        self.info_label.grid(row=6, column=0, columnspan=SIZE, sticky="WE", pady=10)
 
+    # this function initialize various components like buttons and game engine
     def start_game(self):
-        self.board = Board()
-        if self.gamemode.get() == 'PvC':
+        self.board = Board()                        # initialize board
+        if self.gamemode.get() == 'PvC':            # if the mode is Player vs Computer select difficulty
             difficulty = self.difficulty.get()
             if difficulty == "Easy":
                 self.diff = 2
@@ -89,14 +93,16 @@ class GUI:
                 self.diff = 5
             elif difficulty == "Hard":
                 self.diff = 8
+            # initialize engine
             self.engine = engine(MARK.PLAYER_1, MARK.PLAYER_2, self.diff)
 
-        # Remove game mode selection widgets
+        # Remove game mode selection widgets and Skip destroying the info_label
         for widget in self.center_frame.winfo_children():
-            if widget != self.info_label:  # Skip destroying the info_label
+            if widget != self.info_label:
                 widget.destroy()
         self.info_label.config(text="    X move    ")
 
+        # initialize size * size button
         for x in range(SIZE):
             for y in range(SIZE):
                 button = Button(self.center_frame, 
@@ -111,38 +117,44 @@ class GUI:
                                 disabledforeground='#000000')
                 button.grid(row=x, column=y, padx=5, pady=5)
                 self.buttons.append(button)
+        
+        # add a button for resetting the game
         reset_button = Button(self.center_frame, text='Reset', command=self.reset, 
                               font=('Helvetica', 14), 
                               bg='#f44336',
                               fg='white', 
                               activebackground='#d32f2f')
-        reset_button.grid(row = SIZE, column=0, columnspan=SIZE, sticky="WE", pady=10)
+        reset_button.grid(row = 7, column=0, columnspan=SIZE, sticky="WE", pady=10)
 
+    # perform a move operation on the board
     def move(self, x, y):
         if self.board is None:
             return
         
+        # calculate the equivalent position
         pos = (x * SIZE) + y
+
+        # check if the board cell is empty
         if self.board[pos] == MARK.EMPTY:
-            self.board[pos] = self.turn
-            self.buttons[pos]['text'] = 'X' if self.turn == MARK.PLAYER_1 else 'O'
-            self.buttons[pos]['state'] = 'disabled'
+            self.board[pos] = self.turn                                                 # mark the board
+            self.buttons[pos]['text'] = 'X' if self.turn == MARK.PLAYER_1 else 'O'      # display
+            self.buttons[pos]['state'] = 'disabled'                                     # disable the button
 
-            self.turn = MARK.PLAYER_2 if self.turn == MARK.PLAYER_1 else MARK.PLAYER_1
+            self.turn = MARK.PLAYER_2 if self.turn == MARK.PLAYER_1 else MARK.PLAYER_1  # change turn
 
-            winner = self.board.check()
-            if winner != MARK.EMPTY:
-                if winner == MARK.PLAYER_1:
+            winner = self.board.check()                     # check for winner
+            if winner != MARK.EMPTY:                        # if someone is winner
+                if winner == MARK.PLAYER_1:                 # if player one
                     info_text = "    X wins    "
                 else:
                     info_text = "    O wins    "
                 self.info_label.config(text=info_text)
-                self.disable_all_button()
+                self.disable_all_button()                   # disable all buttons
                 return
-            elif not self.board.has_empty():
+            elif not self.board.has_empty():                # if the game is draw
                 info_text = " It's a tie!  "
                 self.info_label.config(text=info_text)
-                self.disable_all_button()
+                self.disable_all_button()                   # disable all buttons
                 return
             else:
                 if self.turn == MARK.PLAYER_1:
@@ -152,14 +164,16 @@ class GUI:
 
             self.info_label.config(text=info_text)
 
-            if self.gamemode.get() == 'PvC' and self.turn == MARK.PLAYER_2:
-                computer_move = self.engine.run(self.board, self.turn)
-                self.move(computer_move // SIZE, computer_move % SIZE)  # Make the computer's move
+            if self.gamemode.get() == 'PvC' and self.turn == MARK.PLAYER_2:     # if the mode is PvC and turn is player_2 i.e. computer
+                computer_move = self.engine.run(self.board, self.turn)          # run engine and engine will return best position
+                self.move(computer_move // SIZE, computer_move % SIZE)          # Make the computer's move
     
+    # disable all button
     def disable_all_button(self):
         for button in self.buttons:
             button['state'] = 'disabled'
 
+    # reset the board
     def reset(self):
         if self.board is None:
             return
@@ -172,7 +186,7 @@ class GUI:
         self.info_label.config(text="    X move    ")
 
     def mainloop(self):
-        self.app.mainloop()
+        self.app.mainloop()     # run mainloop
 
 
 if __name__=='__main__':
